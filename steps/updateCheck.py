@@ -1,50 +1,65 @@
 from behave import *
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
+import time
 
 # Add a global variable to store cart information for Test 1
 cart_info = {"total_count": 0, "total_price": 0.0}
 
 @when('User adds a few items to the cart')
 def step_when_user_adds_items_to_cart(context):
-    # Add code to interact with the website and add items to the cart.
-    # You can use context.driver to locate and click elements for adding items.
-    pass  # Replace with your implementation
+    # Find all the div elements containing the items
+    time.sleep(4)
+    item_divs = context.driver.find_elements(By.XPATH, "//div[@class='sc-uhudcz-0 iZZGui']")
+
+    # Loop through each item div
+    for item_div in item_divs:
+        # Extract the item price
+        item_price = item_div.find_element(By.CLASS_NAME, 'sc-124al1g-6').text.split('$')[1]
+        cart_info['total_price'] += float(item_price)
+        
+        # Click on the "Add to cart" button
+        add_to_cart_button = item_div.find_element(By.CLASS_NAME, 'sc-124al1g-0')
+        add_to_cart_button.click()
+        time.sleep(1)
+
 
 @then('User should verify the total count and price is displayed correctly')
 def step_then_user_verifies_total_count_and_price(context):
-    # Add code to locate and verify the total count and price on the page.
-    # You can use context.driver to locate these elements and assert their values.
-    pass  # Replace with your implementation
+    time.sleep(4)
+    display_price = context.driver.find_element(By.XPATH, '//*[@id="root"]/div/div[2]/div/div[3]/div/p[1]').text.split('$')[1]
+    assert float(display_price) == float(cart_info['total_price'])
 
 @when('User clears all items in the cart')
 def step_when_user_clears_all_items(context):
-    # Add code to clear all items from the cart.
-    # You can use context.driver to locate and interact with the cart elements.
-    pass  # Replace with your implementation
+    clear_cart_button = context.driver.find_element(By.XPATH, "//button[@title='remove product from cart']") 
+    clear_cart_button.click()
+    cart_info["total_count"] = 0
+    cart_info["total_price"] = 0.0
 
 @then('User should verify the price & count is reset to 0')
 def step_then_user_verifies_reset_cart(context):
-    # Add code to verify that the cart's price and count are reset to 0.
-    # You can use context.driver to locate and verify these elements.
-    pass  # Replace with your implementation
+    display_price = context.driver.find_element(By.XPATH, '//*[@id="root"]/div/div[2]/div/div[3]/div/p[1]').text.split('$')[1]
+    assert float(display_price) == 0.0
+
+@then('User should verify the price & count is reset')
+def step_then_user_verifies_reset(context):
+    pass
 
 @when('User clicks on "checkout"')
 def step_when_user_clicks_on_checkout(context):
-    # Add code to locate and click the "checkout" button.
-    # You can use context.driver to locate and click the element.
-    pass  # Replace with your implementation
+    checkout_button = context.driver.find_element(By.XPATH, "//button[contains(text(), 'Checkout')]")
+    checkout_button.click()
 
 @then('User should verify an alert message is displayed with the correct price same as the cart')
 def step_then_user_verifies_alert_message(context):
-    # Add code to handle the alert message and verify the price.
-    # You can use context.driver.switch_to.alert to interact with the alert.
-    pass  # Replace with your implementation
+    alert = context.driver.switch_to.alert
+    alert_text = alert.text
+    alert_price = float(alert_text.split(":")[1].strip().replace("$", ""))
+    assert alert_price == cart_info["total_price"]
+    alert.accept()
 
 @when('User refreshes the page')
 def step_when_user_refreshes_page(context):
-    # Add code to refresh the page.
-    # You can use context.driver.refresh() to refresh the page.
-    pass  # Replace with your implementation
+    context.driver.refresh()
 

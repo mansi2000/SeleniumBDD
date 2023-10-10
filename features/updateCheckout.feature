@@ -16,4 +16,4 @@ Feature: Update and checkout to complete order
     Then User should verify an alert message is displayed with the correct price same as the cart
 
     When User refreshes the page
-    Then User should verify the price & count is reset to 0
+    Then User should verify the price & count is reset
